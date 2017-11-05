@@ -16,7 +16,29 @@ public class ColorSensorTest extends LinearOpMode {
 
     public void runOpMode(){
 
+        roboInit();
 
+        waitForStart();
+
+        while (opModeIsActive()){
+
+            debug();
+
+        }
+
+
+    }
+
+    public void roboInit(){
+
+        sensor = hardwareMap.colorSensor.get("SENSOR");
+
+    }
+
+    public void debug(){
+
+        telemetry.addData("SENSOR", sensor.red());telemetry.addData("SENSOR", sensor.blue());
+        telemetry.update();
 
     }
 

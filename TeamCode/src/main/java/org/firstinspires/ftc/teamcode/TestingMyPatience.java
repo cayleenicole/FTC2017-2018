@@ -27,6 +27,9 @@ public class TestingMyPatience extends LinearOpMode {
     //Arm Mech
     DcMotor extendingArm;
     DcMotor elevatingArm;
+    int currentArmEncoder;
+    int armEncoder;
+    int elevating;
 
     //Relic
     Servo relic;
@@ -45,17 +48,23 @@ public class TestingMyPatience extends LinearOpMode {
     boolean dropDownPrevious;
     boolean dropDownButton;
 
+    //Time
+    double currentTime;
+    double roundTime;
+    double currentRoundTime;
+
     public void runOpMode(){
 
         roboInit();
 
         waitForStart();
 
-        while (opModeIsActive()){
+        while (opModeIsActive()&&  getRuntime() - currentRoundTime < roundTime){
 
             drive();
             armMech();
-            dropDownMech();
+            //dropDownMech();
+            debug();
 
         }
 
@@ -85,14 +94,20 @@ public class TestingMyPatience extends LinearOpMode {
         glyphTwo = hardwareMap.servo.get("GLYPH2");*/
 
         //DropDownWedge
-        dropDownWedge1 = hardwareMap.servo.get("DROP_DOWN_WEDGE1");
+        /*dropDownWedge1 = hardwareMap.servo.get("DROP_DOWN_WEDGE1");
         dropDownWedge2 = hardwareMap.servo.get("DROP_DOWN_WEDGE2");
         dropDownPosIn     = 0.3;
         dropDownPosOut    = 0.75;
         dropDownButtonPos = dropDownPosIn;
         dropDownCurrent   = false;
         dropDownPrevious  = false;
-        dropDownButton    = false;
+        dropDownButton    = false;*/
+
+        //Time
+        roundTime        = 120.0;
+        currentRoundTime = 0.0;
+
+        currentArmEncoder = armEncoder;
 
     }
 
@@ -125,12 +140,23 @@ public class TestingMyPatience extends LinearOpMode {
 
     public void armMech(){
 
+        currentArmEncoder = elevatingArm.getCurrentPosition();
         extendingArm.setPower(gamepad1.right_stick_x);
         elevatingArm.setPower(gamepad1.right_stick_y);
 
+        if(currentArmEncoder - armEncoder >= elevating){
+
+            extendingArm.setPower(-1.0);
+
+        } else if(currentArmEncoder - armEncoder < elevating){
+
+            extendingArm.setPower(0.0);
+
+        }
+
     }
 
-    public void dropDownMech(){
+   public void dropDownMech(){
 
         dropDownButton = gamepad1.right_bumper;
 
@@ -166,6 +192,23 @@ public class TestingMyPatience extends LinearOpMode {
         speed = Range.clip(speed, -1, 1);
 
         return speed;
+
+    }
+
+    public void debug(){
+
+        //DriveTrain
+        telemetry.addData("RIGHT_MOTOR", right.getPower());
+        telemetry.addData("LEFT_MOTOR", left.getPower());
+
+        //DropDownWedges
+        telemetry.addData("DROP_DOWN", dropDownWedge1.getPosition());
+        telemetry.addData("DROP_DOWN2", dropDownWedge2.getPosition());
+
+        //Time
+        telemetry.addData("CURRENT_TIME", (getRuntime() - currentTime));
+
+        telemetry.update();
 
     }
 
